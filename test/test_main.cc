@@ -1,12 +1,29 @@
-#include <qobject.h>
-
+#include <QApplication>
+#include <QTimer>
+#include <QWidget>
 #include <QtTest/QTest>
 
-#include "context.h"
-#include "menu.h"
-#include "play.h"
-#include "utils.h"
-#include "wait.h"
+#include "reversi/client/context.h"
+#include "reversi/client/menu.h"
+#include "reversi/client/play.h"
+#include "reversi/client/wait.h"
+
+using namespace reversi::client;
+
+void ignoreMessageBox(int& closes) {
+  QTimer::singleShot(0, [&closes]() {
+    QWidget* widget = QApplication::activeModalWidget();
+    if (widget) {
+      widget->close();
+      ++closes;
+    }
+  });
+}
+
+void ignoreMessageBox() {
+  int closes = 0;
+  ignoreMessageBox(closes);
+}
 
 class MenuTest : public QObject {
   Q_OBJECT

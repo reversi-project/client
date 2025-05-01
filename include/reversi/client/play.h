@@ -1,6 +1,6 @@
 #pragma once
 
-#include <qpushbutton.h>
+#include <reversi/contract/request.h>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -10,8 +10,9 @@
 #include <QWebSocket>
 #include <QWidget>
 
-#include "config.h"
-#include "reversi/contract/request.h"
+#include "reversi/client/config.h"
+
+namespace reversi::client {
 
 using Request = reversi::contract::Request;
 using Game = reversi::core::Game;
@@ -59,3 +60,5 @@ class Play : public QWidget {
   void ToMenuOnGameEnd();
   void SendRequest(Request&& req);
 };
+
+}  // namespace reversi::client

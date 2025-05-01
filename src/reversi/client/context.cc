@@ -1,14 +1,14 @@
-#include "context.h"
+#include "reversi/client/context.h"
 
-#include <qurl.h>
-#include <qwebsocket.h>
-
+#include <QUrl>
 #include <QWebSocket>
 
-#include "config.h"
-#include "menu.h"
-#include "play.h"
-#include "wait.h"
+#include "reversi/client/config.h"
+#include "reversi/client/menu.h"
+#include "reversi/client/play.h"
+#include "reversi/client/wait.h"
+
+namespace reversi::client {
 
 Context::Context(QStackedWidget* stack)
     : game_id(std::nullopt), stack_(stack), web_socket_(new QWebSocket()) {}
@@ -62,3 +62,5 @@ bool Context::IsWaitPage() const {
 bool Context::IsPlayPage() const {
   return stack_->currentIndex() == play_page_idx_;
 }
+
+}  // namespace reversi::client

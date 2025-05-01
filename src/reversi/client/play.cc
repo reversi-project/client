@@ -1,16 +1,15 @@
-#include "play.h"
+#include "reversi/client/play.h"
 
-#include <qlogging.h>
-#include <qobject.h>
+#include <reversi/contract/common.h>
+#include <reversi/contract/request.h>
+#include <reversi/contract/response.h>
+#include <reversi/core/board.h>
 
 #include <QMessageBox>
-#include <utility>
 
-#include "context.h"
-#include "reversi/contract/common.h"
-#include "reversi/contract/request.h"
-#include "reversi/contract/response.h"
-#include "reversi/core/board.h"
+#include "reversi/client/context.h"
+
+namespace reversi::client {
 
 using namespace reversi::contract;
 using TurnResult = reversi::core::TurnResult;
@@ -250,3 +249,5 @@ void Play::SendRequest(Request&& req) {
   auto raw = RequestToRaw(req);
   ctx_->Send(QString::fromStdString(raw));
 }
+
+}  // namespace reversi::client

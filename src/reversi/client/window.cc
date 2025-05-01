@@ -1,8 +1,10 @@
-#include "window.h"
+#include "reversi/client/window.h"
 
 #include <QBoxLayout>
 
-#include "context.h"
+#include "reversi/client/context.h"
+
+namespace reversi::client {
 
 Window::Window(QWidget* parent) : QWidget(parent) {
   auto* stack = new QStackedWidget;
@@ -16,4 +18,4 @@ Window::Window(QWidget* parent) : QWidget(parent) {
   setStyleSheet("background-color: #d1c4e9;");
 }
 
-Window::~Window() = default;
+}  // namespace reversi::client

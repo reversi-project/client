@@ -1,14 +1,15 @@
 #pragma once
 
-#include <qwebsocket.h>
 #include <reversi/contract/common.h>
+#include <reversi/core/game.h>
 
 #include <QStackedWidget>
 #include <QWebSocket>
 #include <memory>
 
-#include "config.h"
-#include "reversi/core/game.h"
+#include "reversi/client/config.h"
+
+namespace reversi::client {
 
 using GameId = reversi::core::GameId;
 using PlayerSide = reversi::core::PlayerSide;
@@ -44,3 +45,5 @@ class Context : public std::enable_shared_from_this<Context> {
   int wait_page_idx_{};
   int play_page_idx_{};
 };
+
+}  // namespace reversi::client

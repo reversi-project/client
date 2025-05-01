@@ -1,12 +1,15 @@
-#include "menu.h"
+#include "reversi/client/menu.h"
+
+#include <reversi/contract/common.h>
+#include <reversi/contract/request.h>
+#include <reversi/contract/response.h>
 
 #include <QMessageBox>
 #include <utility>
 
-#include "context.h"
-#include "reversi/contract/common.h"
-#include "reversi/contract/request.h"
-#include "reversi/contract/response.h"
+#include "reversi/client/context.h"
+
+namespace reversi::client {
 
 using namespace reversi::contract;
 
@@ -209,3 +212,5 @@ void Menu::ToMainSubpageWithWarning(const QString& message) {
   substack_->setCurrentIndex(main_subpage_idx_);
   ShowWarning(message);
 }
+
+}  // namespace reversi::client

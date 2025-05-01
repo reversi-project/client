@@ -1,5 +1,7 @@
 #pragma once
 
+#include <reversi/contract/request.h>
+
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -8,9 +10,10 @@
 #include <QWebSocket>
 #include <QWidget>
 
-#include "config.h"
-#include "context.h"
-#include "reversi/contract/request.h"
+#include "reversi/client/config.h"
+#include "reversi/client/context.h"
+
+namespace reversi::client {
 
 using Request = reversi::contract::Request;
 
@@ -54,3 +57,5 @@ class Menu : public QWidget {
   int error_subpage_idx_;
   int main_subpage_idx_;
 };
+
+}  // namespace reversi::client

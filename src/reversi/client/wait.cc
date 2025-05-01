@@ -1,12 +1,13 @@
-#include "wait.h"
+#include "reversi/client/wait.h"
 
-#include <qobject.h>
+#include <reversi/contract/response.h>
 
 #include <QMessageBox>
 #include <utility>
 
-#include "context.h"
-#include "reversi/contract/response.h"
+#include "reversi/client/context.h"
+
+namespace reversi::client {
 
 using namespace reversi::contract;
 
@@ -94,3 +95,5 @@ void Wait::ToMenuPageWithWarning(const QString& message) {
   ShowWarning(message);
   ctx_->ToMenuPage();
 }
+
+}  // namespace reversi::client
