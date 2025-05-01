@@ -6,12 +6,12 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QWebSocket>
 #include <QWidget>
 
 #include "reversi/client/config.h"
-#include "reversi/client/context.h"
 
 namespace reversi::client {
 
@@ -22,17 +22,20 @@ class Menu : public QWidget {
 
  public:
   explicit Menu(ContextPtr ctx, QWidget* parent = nullptr);
-  ~Menu() override;
 
   void Refresh();
+
+ signals:
+  void SendRequest(Request req);
+  void ConnectWebSocket();
 
  private slots:
   void OnReloadClicked();
   void OnCreateGameClicked();
   void OnJoinGameClicked();
-  void OnSocketConnected();
-  void OnSocketMessageReceived(const QString& message);
-  void OnSocketError(QAbstractSocket::SocketError error);
+  void OnConnected();
+  void OnMessageReceived(const QString& message);
+  void OnErrorOccured(QAbstractSocket::SocketError error);
 
  private:
   QLabel* error_label_;
@@ -49,7 +52,6 @@ class Menu : public QWidget {
   void InitLoadingSubpage();
   void InitErrorSubpage();
   void InitMainSubpage();
-  void SendRequest(Request&& req);
   void ShowWarning(const QString& message);
   void ToMainSubpageWithWarning(const QString& message);
 

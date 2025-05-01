@@ -11,7 +11,7 @@ class Window : public QWidget {
   Q_OBJECT
 
  public:
-  explicit Window(QWidget* parent = nullptr);
+  explicit Window(QApplication* app);
 
  private:
   ContextPtr ctx_;

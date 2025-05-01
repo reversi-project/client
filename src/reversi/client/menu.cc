@@ -29,34 +29,29 @@ Menu::Menu(ContextPtr ctx, QWidget* parent)
   layout->setContentsMargins(0, 0, 0, 0);
   setLayout(layout);
 
-  ctx_->Connect();
-
   connect(reload_btn_, &QPushButton::clicked, this, &Menu::OnReloadClicked);
   connect(create_game_btn_, &QPushButton::clicked, this,
           &Menu::OnCreateGameClicked);
   connect(join_game_btn_, &QPushButton::clicked, this,
           &Menu::OnJoinGameClicked);
-  connect(ctx_->GetSocket(), &QWebSocket::connected, this,
-          &Menu::OnSocketConnected);
-  connect(ctx_->GetSocket(), &QWebSocket::textMessageReceived, this,
-          &Menu::OnSocketMessageReceived);
-  connect(ctx_->GetSocket(), &QWebSocket::errorOccurred, this,
-          &Menu::OnSocketError);
+  connect(ctx_->GetWorker(), &Worker::Connected, this, &Menu::OnConnected);
+  connect(ctx_->GetWorker(), &Worker::MessageReceived, this,
+          &Menu::OnMessageReceived);
+  connect(ctx_->GetWorker(), &Worker::ErrorOccured, this,
+          &Menu::OnErrorOccured);
 }
 
-Menu::~Menu() = default;
-
 void Menu::Refresh() {
-  ctx_->Connect();
+  emit ConnectWebSocket();
   join_game_edit_->clear();
 }
 
-void Menu::OnReloadClicked() { ctx_->Connect(); }
+void Menu::OnReloadClicked() { emit ConnectWebSocket(); }
 
 void Menu::OnCreateGameClicked() {
   substack_->setCurrentIndex(loading_subpage_idx_);
 
-  SendRequest(CreateRequest{});
+  emit SendRequest(CreateRequest{});
 }
 
 void Menu::OnJoinGameClicked() {
@@ -68,26 +63,22 @@ void Menu::OnJoinGameClicked() {
   }
 
   substack_->setCurrentIndex(loading_subpage_idx_);
-  SendRequest(ConnectRequest{static_cast<GameId>(game_id)});
+  emit SendRequest(ConnectRequest{static_cast<GameId>(game_id)});
 }
 
-void Menu::OnSocketConnected() {
-  substack_->setCurrentIndex(main_subpage_idx_);
-}
+void Menu::OnConnected() { substack_->setCurrentIndex(main_subpage_idx_); }
 
-void Menu::OnSocketMessageReceived(const QString& message) {
+void Menu::OnMessageReceived(const QString& message) {
   if (!ctx_->IsMenuPage()) {
     return;
   }
 
-  auto msg = message.toStdString();
-  auto resp_exp = ResponseFromRaw(msg);
-
-  if (!resp_exp) {
-    ToMainSubpageWithWarning(QString::fromStdString(resp_exp.error()));
+  auto res = ResponseFromRaw(message.toStdString());
+  if (!res) {
+    ToMainSubpageWithWarning(QString::fromStdString(res.error()));
     return;
   }
-  auto resp = resp_exp.value();
+  auto resp = res.value();
 
   auto* game_created_resp = std::get_if<GameCreatedResponse>(&resp);
   if (game_created_resp != nullptr) {
@@ -112,7 +103,7 @@ void Menu::OnSocketMessageReceived(const QString& message) {
   }
 }
 
-void Menu::OnSocketError(QAbstractSocket::SocketError /*error*/) {
+void Menu::OnErrorOccured(QAbstractSocket::SocketError /*error*/) {
   if (!ctx_->IsMenuPage()) {
     return;
   }
@@ -197,11 +188,6 @@ void Menu::InitMainSubpage() {
 
   main_subpage_ = new QWidget;
   main_subpage_->setLayout(main_layout);
-}
-
-void Menu::SendRequest(Request&& req) {
-  auto raw = RequestToRaw(req);
-  ctx_->Send(QString::fromStdString(raw));
 }
 
 void Menu::ShowWarning(const QString& message) {

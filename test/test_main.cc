@@ -4,11 +4,10 @@
 #include <QtTest/QTest>
 
 #include "reversi/client/context.h"
-#include "reversi/client/menu.h"
-#include "reversi/client/play.h"
 #include "reversi/client/wait.h"
 
 using namespace reversi::client;
+using namespace reversi::contract;
 
 void ignoreMessageBox(int& closes) {
   QTimer::singleShot(0, [&closes]() {
@@ -30,13 +29,18 @@ class MenuTest : public QObject {
 
  private slots:
   void initTestCase() {
-    widget_ = new QWidget();
+    worker_ = new Worker;
+    worker_->Init();
+    widget_ = new QWidget;
     stack_ = new QStackedWidget(widget_);
     ctx_ = std::make_shared<Context>(stack_);
-    ctx_->Init(widget_);
+    ctx_->Init(widget_, worker_);
   }
 
-  void cleanupTestCase() { delete widget_; }
+  void cleanupTestCase() {
+    delete widget_;
+    delete worker_;
+  }
 
   void testCreateGameButtonExists() {
     auto* menu = stack_->widget(0);
@@ -72,6 +76,7 @@ class MenuTest : public QObject {
   ContextPtr ctx_;
   QWidget* widget_;
   QStackedWidget* stack_;
+  Worker* worker_;
 };
 
 class WaitTest : public QObject {
@@ -79,14 +84,19 @@ class WaitTest : public QObject {
 
  private slots:
   void initTestCase() {
-    widget_ = new QWidget();
+    worker_ = new Worker;
+    worker_->Init();
+    widget_ = new QWidget;
     stack_ = new QStackedWidget(widget_);
     ctx_ = std::make_shared<Context>(stack_);
-    ctx_->Init(widget_);
+    ctx_->Init(widget_, worker_);
     ctx_->ToWaitPage();
   }
 
-  void cleanupTestCase() { delete widget_; }
+  void cleanupTestCase() {
+    delete widget_;
+    delete worker_;
+  }
 
   void testGameIdExists() {
     ctx_->game_id = 42;
@@ -99,25 +109,25 @@ class WaitTest : public QObject {
 
   void testGameStartResponseTriggerPlayPage() {
     ignoreMessageBox();
-    emit ctx_->GetSocket()->textMessageReceived("start");
+    emit ctx_->GetWorker()->MessageReceived("start");
     QVERIFY(stack_->currentIndex() == 2);
   }
 
   void testErrorResponseTriggerMenuPage() {
     ignoreMessageBox();
-    emit ctx_->GetSocket()->textMessageReceived("error error_message");
+    emit ctx_->GetWorker()->MessageReceived("error error_message");
     QVERIFY(stack_->currentIndex() == 0);
   }
 
   void testInvalidMessageTriggerMenuPage() {
     ignoreMessageBox();
-    emit ctx_->GetSocket()->textMessageReceived("invalid");
+    emit ctx_->GetWorker()->MessageReceived("invalid");
     QVERIFY(stack_->currentIndex() == 0);
   }
 
   void testSocketErrorTriggerMenuPage() {
     ignoreMessageBox();
-    emit ctx_->GetSocket()->errorOccurred(
+    emit ctx_->GetWorker()->ErrorOccured(
         QAbstractSocket::ConnectionRefusedError);
     QVERIFY(stack_->currentIndex() == 0);
   }
@@ -126,6 +136,7 @@ class WaitTest : public QObject {
   ContextPtr ctx_;
   QWidget* widget_;
   QStackedWidget* stack_;
+  Worker* worker_;
 };
 
 class PlayTest : public QObject {
@@ -133,16 +144,21 @@ class PlayTest : public QObject {
 
  private slots:
   void initTestCase() {
-    widget_ = new QWidget();
+    worker_ = new Worker;
+    worker_->Init();
+    widget_ = new QWidget;
     stack_ = new QStackedWidget(widget_);
     ctx_ = std::make_shared<Context>(stack_);
-    ctx_->Init(widget_);
+    ctx_->Init(widget_, worker_);
     ctx_->game_id = 42;
     ctx_->player_side = PlayerSide::kWhite;
     ctx_->ToPlayPage();
   }
 
-  void cleanupTestCase() { delete widget_; }
+  void cleanupTestCase() {
+    delete widget_;
+    delete worker_;
+  }
 
   void testCurrentSideLabelExists() {
     auto* play = stack_->widget(2);
@@ -174,6 +190,7 @@ class PlayTest : public QObject {
   ContextPtr ctx_;
   QWidget* widget_;
   QStackedWidget* stack_;
+  Worker* worker_;
 };
 
 int main(int argc, char** argv) {

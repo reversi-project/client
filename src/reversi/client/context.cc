@@ -7,34 +7,26 @@
 #include "reversi/client/menu.h"
 #include "reversi/client/play.h"
 #include "reversi/client/wait.h"
+#include "reversi/client/worker.h"
 
 namespace reversi::client {
 
 Context::Context(QStackedWidget* stack)
-    : game_id(std::nullopt), stack_(stack), web_socket_(new QWebSocket()) {}
+    : game_id(std::nullopt), stack_(stack) {}
 
-void Context::Init(QWidget* window) {
+void Context::Init(QWidget* parent, Worker* worker) {
+  worker_ = worker;
   auto self = shared_from_this();
 
-  menu_ = new Menu(self, window);
+  menu_ = new Menu(self, parent);
   menu_page_idx_ = stack_->addWidget(menu_);
 
-  wait_ = new Wait(self, window);
+  wait_ = new Wait(self, parent);
   wait_page_idx_ = stack_->addWidget(wait_);
 
-  play_ = new Play(self, window);
+  play_ = new Play(self, parent);
   play_page_idx_ = stack_->addWidget(play_);
 }
-
-Context::~Context() { delete web_socket_; }
-
-QWebSocket* Context::GetSocket() { return web_socket_; }
-
-void Context::Send(const QString& message) {
-  web_socket_->sendTextMessage(message);
-}
-
-void Context::Connect() { web_socket_->open(QUrl(kServerUrl)); }
 
 void Context::ToMenuPage() {
   menu_->Refresh();
@@ -62,5 +54,13 @@ bool Context::IsWaitPage() const {
 bool Context::IsPlayPage() const {
   return stack_->currentIndex() == play_page_idx_;
 }
+
+Menu* Context::GetMenu() const { return menu_; }
+
+Wait* Context::GetWait() const { return wait_; }
+
+Play* Context::GetPlay() const { return play_; }
+
+Worker* Context::GetWorker() const { return worker_; }
 
 }  // namespace reversi::client

@@ -7,6 +7,7 @@ add_library(
   menu.cc
   wait.cc
   play.cc
+  worker.cc
 
   ../../../include/reversi/client/app.h
   ../../../include/reversi/client/window.h
@@ -14,6 +15,7 @@ add_library(
   ../../../include/reversi/client/menu.h
   ../../../include/reversi/client/wait.h
   ../../../include/reversi/client/play.h
+  ../../../include/reversi/client/worker.h
 )
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network WebSockets Test)

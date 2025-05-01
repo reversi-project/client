@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qwebsocket.h>
 #include <reversi/contract/common.h>
 #include <reversi/core/game.h>
 
@@ -8,6 +9,8 @@
 #include <memory>
 
 #include "reversi/client/config.h"
+#include "reversi/client/menu.h"
+#include "reversi/client/worker.h"
 
 namespace reversi::client {
 
@@ -20,12 +23,7 @@ class Context : public std::enable_shared_from_this<Context> {
   std::optional<PlayerSide> player_side;
 
   explicit Context(QStackedWidget* stack);
-  void Init(QWidget* window);
-  ~Context();
-
-  QWebSocket* GetSocket();
-  void Send(const QString& message);
-  void Connect();
+  void Init(QWidget* parent, Worker* worker);
 
   void ToMenuPage();
   void ToWaitPage();
@@ -35,8 +33,13 @@ class Context : public std::enable_shared_from_this<Context> {
   bool IsWaitPage() const;
   bool IsPlayPage() const;
 
- protected:
-  QWebSocket* web_socket_;
+  Menu* GetMenu() const;
+  Wait* GetWait() const;
+  Play* GetPlay() const;
+  Worker* GetWorker() const;
+
+ private:
+  Worker* worker_;
   QStackedWidget* stack_{};
   Menu* menu_;
   Wait* wait_;

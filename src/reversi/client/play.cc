@@ -57,10 +57,10 @@ Play::Play(ContextPtr ctx, QWidget* parent)
   setLayout(outer_layout);
   Redraw();
 
-  connect(ctx_->GetSocket(), &QWebSocket::textMessageReceived, this,
-          &Play::OnSocketMessageReceived);
-  connect(ctx_->GetSocket(), &QWebSocket::errorOccurred, this,
-          &Play::OnSocketError);
+  connect(ctx_->GetWorker(), &Worker::MessageReceived, this,
+          &Play::OnMessageReceived);
+  connect(ctx_->GetWorker(), &Worker::ErrorOccured, this,
+          &Play::OnErrorOccured);
 }
 
 Play::~Play() = default;
@@ -89,19 +89,17 @@ void Play::OnCellClicked() {
   }
 }
 
-void Play::OnSocketMessageReceived(const QString& message) {
+void Play::OnMessageReceived(const QString& message) {
   if (!ctx_->IsPlayPage()) {
     return;
   }
 
-  auto msg = message.toStdString();
-  auto resp_exp = ResponseFromRaw(msg);
-
-  if (!resp_exp) {
-    ToMenuPageWithWarning(QString::fromStdString(resp_exp.error()));
+  auto res = ResponseFromRaw(message.toStdString());
+  if (!res) {
+    ToMenuPageWithWarning(QString::fromStdString(res.error()));
     return;
   }
-  auto resp = resp_exp.value();
+  auto resp = res.value();
 
   auto* opponent_resp = std::get_if<OpponentTurnResponse>(&resp);
   if (opponent_resp != nullptr) {
@@ -122,7 +120,7 @@ void Play::OnSocketMessageReceived(const QString& message) {
   }
 }
 
-void Play::OnSocketError(QAbstractSocket::SocketError /*error*/) {
+void Play::OnErrorOccured(QAbstractSocket::SocketError /*error*/) {
   if (!ctx_->IsPlayPage()) {
     return;
   }
@@ -137,8 +135,7 @@ void Play::MakeTurn(Pos pos) {
     return;
   }
   Redraw();
-  auto req = TurnRequest{.game_id = *ctx_->game_id, .pos = pos};
-  SendRequest(req);
+  emit SendRequest(TurnRequest{.game_id = *ctx_->game_id, .pos = pos});
   if (game_.IsFinished()) {
     ToMenuOnGameEnd();
   }
@@ -245,9 +242,9 @@ void Play::ToMenuOnGameEnd() {
   ctx_->ToMenuPage();
 }
 
-void Play::SendRequest(Request&& req) {
-  auto raw = RequestToRaw(req);
-  ctx_->Send(QString::fromStdString(raw));
-}
+// void Play::SendRequest(Request&& req) {
+//   auto raw = RequestToRaw(req);
+//   ctx_->Send(QString::fromStdString(raw));
+// }
 
 }  // namespace reversi::client

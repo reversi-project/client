@@ -26,8 +26,8 @@ class Wait : public QWidget {
   void Refresh();
 
  private slots:
-  void OnSocketMessageReceived(const QString& message);
-  void OnSocketError(QAbstractSocket::SocketError error);
+  void OnMessageReceived(const QString& message);
+  void OnErrorOccured(QAbstractSocket::SocketError error);
 
  private:
   QLabel* game_id_label_;

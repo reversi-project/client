@@ -36,10 +36,13 @@ class Play : public QWidget {
 
   void Refresh();
 
+ signals:
+  void SendRequest(Request req);
+
  private slots:
   void OnCellClicked();
-  void OnSocketMessageReceived(const QString& message);
-  void OnSocketError(QAbstractSocket::SocketError error);
+  void OnMessageReceived(const QString& message);
+  void OnErrorOccured(QAbstractSocket::SocketError error);
 
  private:
   ContextPtr ctx_;
@@ -58,7 +61,6 @@ class Play : public QWidget {
   GameResult GetGameResult();
   QString GetResultMessage(GameResult result);
   void ToMenuOnGameEnd();
-  void SendRequest(Request&& req);
 };
 
 }  // namespace reversi::client

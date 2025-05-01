@@ -5,10 +5,10 @@
 namespace reversi::client {
 
 class Menu;
-
 class Wait;
 class Play;
 
+class Window;
 class Context;
 using ContextPtr = std::shared_ptr<Context>;
 

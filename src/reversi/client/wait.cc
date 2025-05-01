@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "reversi/client/context.h"
+#include "reversi/client/worker.h"
 
 namespace reversi::client {
 
@@ -37,10 +38,10 @@ Wait::Wait(ContextPtr ctx, QWidget* parent)
   main_layout->addStretch();
 
   setLayout(main_layout);
-  connect(ctx_->GetSocket(), &QWebSocket::textMessageReceived, this,
-          &Wait::OnSocketMessageReceived);
-  connect(ctx_->GetSocket(), &QWebSocket::errorOccurred, this,
-          &Wait::OnSocketError);
+  connect(ctx_->GetWorker(), &Worker::MessageReceived, this,
+          &Wait::OnMessageReceived);
+  connect(ctx_->GetWorker(), &Worker::ErrorOccured, this,
+          &Wait::OnErrorOccured);
 }
 
 Wait::~Wait() = default;
@@ -52,19 +53,17 @@ void Wait::Refresh() {
   }
 }
 
-void Wait::OnSocketMessageReceived(const QString& message) {
+void Wait::OnMessageReceived(const QString& message) {
   if (!ctx_->IsWaitPage()) {
     return;
   }
 
-  auto msg = message.toStdString();
-  auto resp_exp = ResponseFromRaw(msg);
-
-  if (!resp_exp) {
-    ToMenuPageWithWarning(QString::fromStdString(resp_exp.error()));
+  auto res = ResponseFromRaw(message.toStdString());
+  if (!res) {
+    ToMenuPageWithWarning(QString::fromStdString(res.error()));
     return;
   }
-  auto resp = resp_exp.value();
+  auto resp = res.value();
 
   auto* game_start_resp = std::get_if<GameStartResponse>(&resp);
   if (game_start_resp != nullptr) {
@@ -79,7 +78,7 @@ void Wait::OnSocketMessageReceived(const QString& message) {
   }
 }
 
-void Wait::OnSocketError(QAbstractSocket::SocketError /*error*/) {
+void Wait::OnErrorOccured(QAbstractSocket::SocketError /*error*/) {
   if (!ctx_->IsWaitPage()) {
     return;
   }
